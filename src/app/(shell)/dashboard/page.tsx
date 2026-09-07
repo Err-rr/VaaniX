@@ -2,12 +2,15 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
+import { Mail, MessageSquare } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { SummaryStrip } from "@/components/dashboard/summary-strip";
 import { RecentActivityList } from "@/components/dashboard/recent-activity-list";
 import { RiskWaveform } from "@/components/dashboard/risk-waveform";
 import { RiskSpectrum } from "@/components/dashboard/risk-spectrum";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { KPI_STATS } from "@/data/mock-overview";
 import { ALL_CALLS } from "@/data/mock-calls";
 import { useLiveCounter } from "@/hooks/use-risk-updates";
@@ -47,12 +50,36 @@ export default function DashboardPage() {
           </p>
         </div>
         <Card className="flex flex-col gap-6 px-6 py-6">
-          <div>
-            <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-start gap-6">
+            <div className="min-w-0 flex-1">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-foreground-faint">Live Signal</span>
-              <span className="text-[11.5px] text-foreground-faint">Aggregate across active calls</span>
+              <RiskWaveform className="mt-2" />
             </div>
-            <RiskWaveform />
+            <div className="flex w-[168px] shrink-0 flex-col gap-2">
+              <span className="text-right text-[11.5px] text-foreground-faint">Aggregate across active calls</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  toast.message("Not connected yet", {
+                    description: "Will notify the cybersecurity team once the backend is connected.",
+                  })
+                }
+              >
+                <Mail className="size-3.5" /> Mail Cybersec
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  toast.message("Not connected yet", {
+                    description: "Will message the user once the backend is connected.",
+                  })
+                }
+              >
+                <MessageSquare className="size-3.5" /> Message User
+              </Button>
+            </div>
           </div>
           <div>
             <div className="mb-2 flex items-center justify-between">
