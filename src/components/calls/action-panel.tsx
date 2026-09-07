@@ -2,83 +2,78 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { CheckCheck, PauseCircle, ShieldAlert, ShieldCheck, X } from "lucide-react";
+import { Check } from "lucide-react";
 import type { Severity } from "@/types/common";
 import { cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 interface ActionDef {
   key: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  variant: "critical" | "warning" | "secondary" | "positive" | "outline";
   description: string;
 }
 
-const ACTIONS: ActionDef[] = [
-  { key: "verify", label: "Require Verification", icon: ShieldAlert, variant: "warning", description: "Send a secondary verification challenge before proceeding." },
-  { key: "hold", label: "Hold Transaction", icon: PauseCircle, variant: "secondary", description: "Place any pending transaction on hold pending review." },
-  { key: "escalate", label: "Escalate to Fraud Team", icon: ShieldAlert, variant: "critical", description: "Open an investigation and notify the fraud response team." },
-  { key: "safe", label: "Mark as Safe", icon: ShieldCheck, variant: "positive", description: "Confirm this call as legitimate and close the alert." },
-  { key: "dismiss", label: "Dismiss Alert", icon: X, variant: "outline", description: "Dismiss without further action." },
-];
+const PRIMARY_ACTION_LABEL: Record<Severity, string> = {
+  critical: "Require Verification",
+  high: "Require Verification",
+  medium: "Hold Transaction",
+  low: "Mark as Safe",
+};
 
-function recommendedActionKey(severity: Severity): string {
-  if (severity === "critical") return "verify";
-  if (severity === "high") return "verify";
-  if (severity === "medium") return "hold";
-  return "safe";
-}
+const RESPONSE_HEADLINE: Record<Severity, string> = {
+  critical: "Secondary verification required",
+  high: "Secondary verification required",
+  medium: "Continued monitoring advised",
+  low: "No action required",
+};
+
+const SECONDARY_ACTIONS: ActionDef[] = [
+  { key: "hold", label: "Hold Transaction", description: "Place any pending transaction on hold pending review." },
+  { key: "escalate", label: "Escalate to Fraud Team", description: "Open an investigation and notify the fraud response team." },
+  { key: "safe", label: "Mark as Safe", description: "Confirm this call as legitimate and close the alert." },
+  { key: "dismiss", label: "Dismiss Alert", description: "Dismiss without further action." },
+];
 
 export function ActionPanel({ severity }: { severity: Severity }) {
   const [taken, setTaken] = useState<string | null>(null);
-  const recommended = recommendedActionKey(severity);
+  const primaryLabel = PRIMARY_ACTION_LABEL[severity];
+  const secondaryActions = SECONDARY_ACTIONS.filter((a) => a.label !== primaryLabel);
 
-  function handleAction(action: ActionDef) {
-    setTaken(action.key);
-    toast.success(`${action.label} recorded`, { description: action.description });
+  function record(label: string, description: string, key: string) {
+    setTaken(key);
+    toast.success(`${label} recorded`, { description });
   }
 
   return (
-    <Card className="border-accent/25">
-      <CardHeader className="border-b border-border pb-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-accent-strong">Recommended Response</p>
-          <CardTitle className="mt-0.5 text-[14px]">
-            {severity === "critical" || severity === "high"
-              ? "Secondary verification required"
-              : severity === "medium"
-                ? "Continued monitoring advised"
-                : "No action required"}
-          </CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-2 pt-4">
-        {ACTIONS.map((action) => {
-          const Icon = action.icon;
-          const isRecommended = action.key === recommended;
-          const isTaken = taken === action.key;
-          return (
-            <Button
-              key={action.key}
-              variant={isTaken ? "secondary" : action.variant}
-              className={cn("justify-start gap-2.5", isRecommended && !taken && "ring-2 ring-accent/30")}
-              onClick={() => handleAction(action)}
-              disabled={!!taken && !isTaken}
-            >
-              {isTaken ? <CheckCheck className="size-4" /> : <Icon className="size-4" />}
-              {action.label}
-              {isRecommended && !taken && (
-                <span className="ml-auto rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
-                  Recommended
-                </span>
-              )}
-              {isTaken && <span className="ml-auto text-[11px] font-medium">Recorded</span>}
-            </Button>
-          );
-        })}
-      </CardContent>
-    </Card>
+    <div className="flex flex-col gap-3">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-foreground-faint">Recommended Response</p>
+        <p className="mt-0.5 text-[13.5px] font-medium text-foreground">{RESPONSE_HEADLINE[severity]}</p>
+      </div>
+
+      <Button
+        variant={severity === "critical" ? "critical" : "default"}
+        className="justify-center"
+        disabled={!!taken}
+        onClick={() => record(primaryLabel, "Primary recommended action for this call.", "primary")}
+      >
+        {taken === "primary" ? <Check className="size-4" /> : null}
+        {taken === "primary" ? `${primaryLabel} recorded` : primaryLabel}
+      </Button>
+
+      <div className={cn("flex flex-wrap gap-x-4 gap-y-1.5", taken && "opacity-50")}>
+        {secondaryActions.map((action) => (
+          <button
+            key={action.key}
+            type="button"
+            disabled={!!taken}
+            onClick={() => record(action.label, action.description, action.key)}
+            className="text-[12.5px] font-medium text-foreground-muted underline-offset-2 hover:text-foreground hover:underline disabled:pointer-events-none"
+          >
+            {action.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

@@ -1,11 +1,21 @@
 "use client";
 
-import { useDemoMode } from "@/hooks/use-demo-mode";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth-store";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  useDemoMode();
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+
+  useEffect(() => {
+    if (hasHydrated && !isAuthenticated) router.replace("/login");
+  }, [hasHydrated, isAuthenticated, router]);
+
+  if (!hasHydrated || !isAuthenticated) return null;
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">

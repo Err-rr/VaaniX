@@ -4,18 +4,16 @@ import { useMemo } from "react";
 import { createSeededRandom } from "@/data/constants";
 import { cn } from "@/lib/utils";
 
-/** Stylized spectral-activity heatmap grid — not a literal audio spectrogram, but a legible visual proxy for it. */
-export function Spectrogram({
-  columns = 48,
-  rows = 14,
+/** Ambient spectral-activity grid — a stylized proxy for aggregate signal activity, not a literal spectrogram. */
+export function RiskSpectrum({
+  columns = 56,
+  rows = 12,
   seed = 9,
-  active = true,
   className,
 }: {
   columns?: number;
   rows?: number;
   seed?: number;
-  active?: boolean;
   className?: string;
 }) {
   const grid = useMemo(() => {
@@ -37,12 +35,12 @@ export function Spectrogram({
           {col.map((v, r) => (
             <span
               key={r}
-              className={cn("block w-full rounded-[1px]", active && "animate-pulse-dot")}
+              className="block w-full rounded-[1px] animate-pulse-dot"
               style={{
                 height: `${(100 / rows).toFixed(3)}%`,
                 backgroundColor: "var(--color-accent)",
                 opacity: Number((0.08 + v * 0.75).toFixed(3)),
-                animationDelay: active ? `${(c % 10) * 70}ms` : undefined,
+                animationDelay: `${(c % 10) * 70}ms`,
                 animationDuration: "2.2s",
               }}
             />

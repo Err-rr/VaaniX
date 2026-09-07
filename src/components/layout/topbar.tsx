@@ -4,7 +4,6 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
 import { CommandMenu } from "./command-menu";
-import { DemoModeToggle } from "./demo-mode-toggle";
 import { NotificationCenter } from "./notification-center";
 
 export function Topbar() {
@@ -16,7 +15,6 @@ export function Topbar() {
         <CommandMenu />
       </div>
       <div className="flex items-center gap-2">
-        <DemoModeToggle />
         <NotificationCenter />
         <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
           {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}

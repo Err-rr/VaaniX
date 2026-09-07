@@ -1,20 +1,22 @@
 import { cn } from "@/lib/utils";
 
+/**
+ * Minimal monogram mark: a rounded badge containing an open signal ring with
+ * a directional aperture — evokes monitoring/detection without resorting to
+ * a literal shield, lock, or waveform glyph.
+ */
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" fill="none" className={cn("size-6", className)} aria-hidden>
+    <svg viewBox="0 0 28 28" fill="none" className={cn("size-[22px]", className)} aria-hidden>
+      <rect x="0.5" y="0.5" width="27" height="27" rx="7" fill="var(--color-accent)" />
       <path
-        d="M16 2.5 27 6.5V15c0 8-4.7 13-11 14.5C9.7 28 5 23 5 15V6.5L16 2.5Z"
-        fill="var(--color-accent)"
-      />
-      <path
-        d="M11 17.5 13.2 12l2 5.7 1.7-8.4 1.9 8.4 1.8-3.7H21"
+        d="M14 6.4a7.6 7.6 0 1 1 -6.7 4"
         stroke="var(--color-accent-foreground)"
-        strokeWidth="1.6"
+        strokeWidth="2.1"
         strokeLinecap="round"
-        strokeLinejoin="round"
         fill="none"
       />
+      <circle cx="14" cy="14" r="2.15" fill="var(--color-accent-foreground)" />
     </svg>
   );
 }

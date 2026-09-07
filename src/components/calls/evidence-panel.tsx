@@ -1,6 +1,5 @@
 import { AlertTriangle, CircleCheck } from "lucide-react";
 import type { EvidenceItem } from "@/types/call";
-import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function EvidencePanel({ evidence, assessment }: { evidence: EvidenceItem[]; assessment: string }) {
@@ -26,13 +25,8 @@ export function EvidencePanel({ evidence, assessment }: { evidence: EvidenceItem
           )}
         </ul>
 
-        <div
-          className={cn(
-            "mt-4 rounded-md border p-3.5",
-            "border-accent/25 bg-accent-soft"
-          )}
-        >
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-accent-strong">
+        <div className="mt-4 rounded-md border border-border bg-surface-sunken/60 p-3.5">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-foreground-faint">
             System Assessment
           </p>
           <p className="text-[13px] leading-snug text-foreground">{assessment}</p>

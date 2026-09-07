@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { ChartCard } from "@/components/charts/chart-card";
+import { VoiceRiskActivitySection } from "@/components/charts/voice-risk-activity-section";
 import { TrendLineChart } from "@/components/charts/trend-line-chart";
 import { DualLineChart } from "@/components/charts/dual-line-chart";
 import { HorizontalBarChart } from "@/components/charts/horizontal-bar-chart";
@@ -28,7 +29,11 @@ export default function AnalyticsPage() {
     <div className="flex flex-col pb-8">
       <PageHeader title="Analytics" subtitle="Detection performance and risk trends across the organization" />
 
-      <div className="grid grid-cols-2 gap-3 px-6 sm:grid-cols-4">
+      <div className="px-6">
+        <VoiceRiskActivitySection />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 px-6 pt-4 sm:grid-cols-4">
         {ACCURACY_STATS.map((s) => (
           <Card key={s.label} className="px-4 py-3.5">
             <p className="text-[12px] font-medium uppercase tracking-wide text-foreground-muted">{s.label}</p>
