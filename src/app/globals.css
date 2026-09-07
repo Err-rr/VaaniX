@@ -1,0 +1,219 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------- */
+/* VoxAegis design tokens                                                  */
+/* Light mode is the primary interface; dark mode is opt-in via .dark      */
+/* ---------------------------------------------------------------------- */
+
+:root {
+  --background: #f6f6f8;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f0f0f3;
+
+  --border: #e3e3e9;
+  --border-strong: #d3d3dc;
+
+  --foreground: #14141c;
+  --foreground-muted: #6b6b78;
+  --foreground-faint: #9494a1;
+
+  --accent: #5b3df0;
+  --accent-strong: #4a2fd6;
+  --accent-soft: #efeafd;
+  --accent-foreground: #ffffff;
+
+  --positive: #187a4e;
+  --positive-soft: #e6f5ec;
+  --positive-strong: #0f5c3a;
+
+  --warning: #b4690e;
+  --warning-soft: #fdf1e0;
+  --warning-strong: #8f5209;
+
+  --critical: #c22a2a;
+  --critical-soft: #fbe9e9;
+  --critical-strong: #971f1f;
+
+  --info: #2563a8;
+  --info-soft: #e8f1fb;
+
+  --chart-1: #5b3df0;
+  --chart-2: #187a4e;
+  --chart-3: #b4690e;
+  --chart-4: #c22a2a;
+  --chart-5: #2563a8;
+  --chart-grid: #eaeaef;
+
+  --focus-ring: #5b3df0;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(20, 20, 28, 0.04);
+  --shadow-md: 0 2px 8px -2px rgba(20, 20, 28, 0.08), 0 1px 2px -1px rgba(20, 20, 28, 0.06);
+  --shadow-lg: 0 8px 24px -6px rgba(20, 20, 28, 0.12);
+}
+
+.dark {
+  --background: #0c0c11;
+  --surface: #131318;
+  --surface-raised: #1a1a21;
+  --surface-sunken: #0a0a0e;
+
+  --border: #26262f;
+  --border-strong: #34343f;
+
+  --foreground: #ededf2;
+  --foreground-muted: #9a9aa5;
+  --foreground-faint: #6c6c78;
+
+  --accent: #8a76ff;
+  --accent-strong: #a293ff;
+  --accent-soft: #221c47;
+  --accent-foreground: #0c0c11;
+
+  --positive: #3fbd85;
+  --positive-soft: #10281d;
+  --positive-strong: #6fd7a6;
+
+  --warning: #e0a341;
+  --warning-soft: #2c2210;
+  --warning-strong: #f0bd6b;
+
+  --critical: #ea5a5a;
+  --critical-soft: #2c1414;
+  --critical-strong: #f58080;
+
+  --info: #5b9bdb;
+  --info-soft: #12233a;
+
+  --chart-1: #8a76ff;
+  --chart-2: #3fbd85;
+  --chart-3: #e0a341;
+  --chart-4: #ea5a5a;
+  --chart-5: #5b9bdb;
+  --chart-grid: #202028;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 10px -2px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 28px -6px rgba(0, 0, 0, 0.55);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-faint: var(--foreground-faint);
+
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-positive-strong: var(--positive-strong);
+
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-strong: var(--warning-strong);
+
+  --color-critical: var(--critical);
+  --color-critical-soft: var(--critical-soft);
+  --color-critical-strong: var(--critical-strong);
+
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-grid: var(--chart-grid);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-feature-settings: "cv11", "ss01", "tnum";
+}
+
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+/* Tabular numerals for metrics, IDs, timestamps */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Thin scrollbars for dense tables/panels */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 999px;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.animate-pulse-dot {
+  animation: pulse-dot 1.8s ease-in-out infinite;
+}
+
+@keyframes waveform-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+[cmdk-overlay] {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(10, 10, 14, 0.35);
+  -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(1px);
+}
+
