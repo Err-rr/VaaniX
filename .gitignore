@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -39,3 +40,30 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+=======
+# Ignore virtual environment
+.venv/
+venv/
+ENV/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore large model checkpoints & weights
+*.pt
+*.pth
+*.bin
+*.part
+xlsr2_300m*
+wav2vec2_Nes2Net_X_best*
+
+# Logs & temp files
+.uuid
+*.out
+*.log
+.DS_Store
+Thumbs.db
+Test_*.txt
+0220_*/
+>>>>>>> dfa3266 (feat: Add VoxAegis audio deepfake detection engine, workflow guide, and benchmark suite)
