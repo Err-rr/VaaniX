@@ -14,6 +14,32 @@ def pad(x, max_len=64000):
     padded_x = np.tile(x, (1, num_repeats))[:, :max_len][0]
     return padded_x
 
+def ensure_checkpoints_exist(model_path="wav2vec2_Nes2Net_X_best.pth", xlsr_path="xlsr2_300m.pt"):
+    import urllib.request
+    if not os.path.exists(xlsr_path):
+        print(f"📥 Missing XLSR foundation model weights: {xlsr_path}")
+        print(f"Downloading Meta Wav2Vec 2.0 XLSR 300M (~3.8 GB)...")
+        try:
+            url = "https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr2_300m.pt"
+            urllib.request.urlretrieve(url, xlsr_path)
+            print(f"✅ XLSR 300M model downloaded successfully: {xlsr_path}\n")
+        except Exception as e:
+            print(f"⚠️ Automatic download failed: {e}")
+            print(f"Please run: aria2c -x 16 -s 16 https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr2_300m.pt")
+            raise FileNotFoundError(f"Missing foundation model checkpoint: {xlsr_path}")
+
+    if not os.path.exists(model_path):
+        print(f"📥 Missing Nes2Net model checkpoint: {model_path}")
+        print(f"Downloading pre-trained Nes2Net checkpoint (~1.2 GB)...")
+        try:
+            import gdown
+            gdown.download(id='1JFGv_2TONMnTLGbiOIuHFfMvuo4SIIpg', output=model_path, resume=True)
+            print(f"✅ Nes2Net checkpoint downloaded successfully: {model_path}\n")
+        except Exception as e:
+            print(f"⚠️ Automatic download failed: {e}")
+            print(f"Please run: python -c \"import gdown; gdown.download(id='1JFGv_2TONMnTLGbiOIuHFfMvuo4SIIpg', output='{model_path}', resume=True)\"")
+            raise FileNotFoundError(f"Missing Nes2Net checkpoint: {model_path}")
+
 def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"\n==================================================")
@@ -25,8 +51,8 @@ def main(args):
 
     if not os.path.exists(args.file_to_test):
         raise FileNotFoundError(f"Audio file not found: {args.file_to_test}")
-    if not os.path.exists(args.model_path):
-        raise FileNotFoundError(f"Model checkpoint not found: {args.model_path}")
+
+    ensure_checkpoints_exist(model_path=args.model_path)
 
     from model_scripts.wav2vec2_Nes2Net_X import wav2vec2_Nes2Net_no_Res_w_allT as Model
 
