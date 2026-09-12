@@ -1,0 +1,37 @@
+# Standalone deps for voice_detection_pipeline/ — install into this folder's
+# own venv. Not merged into the project's top-level requirements.
+#
+# fairseq is deliberately NOT listed here — it needs its own no-deps install
+# command under Python 3.10 specifically. See README.md, section "Setup."
+
+# --- capture.py (BlackHole audio capture) ---
+sounddevice>=0.4.6
+soundfile>=0.12.1
+numpy>=1.26.0
+
+# --- model_runner.py (Nes2Net inference) ---
+torch>=2.0.0
+torchaudio>=2.0.0
+librosa>=0.10.0
+scipy>=1.11.0
+
+# Pinned exactly, not >= : fairseq (old, 0.12.2) breaks against newer
+# omegaconf/hydra-core due to a dataclass incompatibility. These exact
+# versions come from reference_env/requirements-frozen.txt, a teammate's
+# pip freeze from a machine where the full stack is confirmed working.
+# If pip refuses these with an "invalid metadata" error, that's pip >=24.1
+# being stricter than these old packages' metadata allows — fix is
+# `pip install "pip<24.1"` first, not changing these version pins.
+omegaconf==2.0.6
+hydra-core==1.0.7
+
+bitarray
+tensorboardX
+gdown
+tqdm
+
+# fairseq is installed with --no-deps (see Setup), so anything it needs at
+# import time has to be listed here explicitly. fairseq/__init__.py eagerly
+# imports fairseq.scoring (BLEU translation metrics — unrelated to audio
+# detection, but still imported unconditionally), which needs this:
+sacrebleu
