@@ -275,6 +275,34 @@ never mistake a placeholder score for a real one.
 
 ---
 
+## Running it as a live server (for the frontend's Live Detection page)
+
+`pipeline.py` is a one-shot script — it records once, scores once, exits.
+The Next.js app's **Live Detection** page needs the model to stay loaded and
+answer many short requests in a row instead, so use `server.py`:
+
+```
+python server.py
+VOICE_DETECTION_STUB=1 python server.py   # random scores, no weights needed
+```
+
+This starts an HTTP server on `http://127.0.0.1:8765` (override with
+`VOICE_DETECTION_PORT`) that keeps `model_runner.py`'s model singleton loaded
+across requests instead of reloading it every time. It exposes:
+
+- `GET /health` → `{"status": "ok", "stub": <bool>}`
+- `POST /detect` → form field `audio` (a WAV file) → the same JSON shape
+  `pipeline.py` writes to `results/*.json`
+
+The Next.js app's `src/app/api/live-detection/route.ts` proxies browser
+requests to this server — the browser never talks to it directly, so it
+only ever needs to be reachable from the machine running `next dev`/`next
+start`. Leave this running in its own terminal while using the Live
+Detection page; if it isn't running, the page will show a "detection engine
+unreachable" error instead of a verdict.
+
+---
+
 ## Output
 
 Each run produces two files in `results/`:

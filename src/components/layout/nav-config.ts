@@ -6,6 +6,7 @@ import {
   Fingerprint,
   Gauge,
   History,
+  Mic,
   Phone,
   Plug,
   ScrollText,
@@ -24,6 +25,7 @@ export interface NavItem {
 export const PRIMARY_NAV: NavItem[] = [
   { label: "Overview", href: "/dashboard", icon: Gauge },
   { label: "Live Calls", href: "/live-calls", icon: Phone },
+  { label: "Live Detection", href: "/live-detection", icon: Mic },
   { label: "Alerts", href: "/alerts", icon: Bell },
   { label: "Investigations", href: "/investigations", icon: Search },
   { label: "Voice Profiles", href: "/voice-profiles", icon: Fingerprint },

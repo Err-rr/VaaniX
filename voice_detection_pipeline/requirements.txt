@@ -9,6 +9,9 @@ sounddevice>=0.4.6
 soundfile>=0.12.1
 numpy>=1.26.0
 
+# --- server.py (HTTP server for the frontend's Live Detection page) ---
+flask>=3.0.0
+
 # --- model_runner.py (Nes2Net inference) ---
 torch>=2.0.0
 torchaudio>=2.0.0
