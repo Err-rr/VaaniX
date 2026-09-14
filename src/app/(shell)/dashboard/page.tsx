@@ -50,12 +50,12 @@ export default function DashboardPage() {
           </p>
         </div>
         <Card className="flex flex-col gap-6 px-6 py-6">
-          <div className="flex items-start gap-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
             <div className="min-w-0 flex-1">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-foreground-faint">Live Signal</span>
               <RiskWaveform className="mt-2" />
             </div>
-            <div className="flex w-[168px] shrink-0 flex-col gap-2">
+            <div className="flex w-full shrink-0 flex-col gap-2 sm:w-[168px]">
               <span className="text-right text-[11.5px] text-foreground-faint">Aggregate across active calls</span>
               <Button
                 variant="outline"

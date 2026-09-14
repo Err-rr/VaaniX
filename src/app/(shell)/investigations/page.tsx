@@ -52,7 +52,7 @@ export default function InvestigationsPage() {
             onSearchChange={setSearch}
             searchPlaceholder="Search by investigation ID, title, or subject…"
           >
-            <FilterSelect label="Status" value={status} onChange={setStatus} options={STATUS_OPTIONS} className="w-[170px]" />
+            <FilterSelect label="Status" value={status} onChange={setStatus} options={STATUS_OPTIONS} className="w-full sm:w-[170px]" />
           </FilterBar>
           <InvestigationsTable investigations={filtered} />
         </Card>

@@ -33,7 +33,7 @@ export function FilterBar({
         </div>
       )}
       <div className="flex flex-1 flex-wrap items-center gap-2">{children}</div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>
   );
 }

@@ -41,7 +41,7 @@ function ChartTooltip({
   const anomaly = label ? anomaliesByLabel[label] : undefined;
 
   return (
-    <div className="min-w-[210px] rounded-md border border-border-strong bg-surface-raised p-3 text-[12px] shadow-lg">
+    <div className="min-w-[210px] max-w-[calc(100vw-2rem)] rounded-md border border-border-strong bg-surface-raised p-3 text-[12px] shadow-lg">
       <p className="mb-1.5 font-semibold text-foreground">{label}</p>
       <dl className="space-y-0.5">
         <div className="flex items-center justify-between">

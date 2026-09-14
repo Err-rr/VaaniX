@@ -86,7 +86,7 @@ export default function AlertsPage() {
             }
           >
             <FilterSelect label="Severity" value={severity} onChange={setSeverity} options={SEVERITY_OPTIONS} />
-            <FilterSelect label="Status" value={status} onChange={setStatus} options={STATUS_OPTIONS} className="w-[170px]" />
+            <FilterSelect label="Status" value={status} onChange={setStatus} options={STATUS_OPTIONS} className="w-full sm:w-[170px]" />
           </FilterBar>
           <AlertsTable alerts={filtered.slice(0, 60)} onSelect={setSelected} />
         </Card>

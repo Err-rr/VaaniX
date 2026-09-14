@@ -57,7 +57,7 @@ export default function VoiceProfilesPage() {
             onSearchChange={setSearch}
             searchPlaceholder="Search by name, role, or department…"
           >
-            <FilterSelect label="Status" value={status} onChange={setStatus} options={STATUS_OPTIONS} className="w-[170px]" />
+            <FilterSelect label="Status" value={status} onChange={setStatus} options={STATUS_OPTIONS} className="w-full sm:w-[170px]" />
           </FilterBar>
           <VoiceProfilesTable profiles={filtered} />
         </Card>

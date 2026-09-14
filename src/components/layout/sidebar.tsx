@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronsUpDown, LogOut } from "lucide-react";
+import { ChevronsUpDown, LogOut, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PRIMARY_NAV, type NavItem } from "./nav-config";
 import { Logo } from "./logo";
@@ -39,7 +39,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function Sidebar() {
+export function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; onClose: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
@@ -51,41 +51,61 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex h-full w-[212px] shrink-0 flex-col border-r border-border bg-surface">
-      <div className="flex h-14 items-center border-b border-border px-4">
-        <Logo />
-      </div>
+    <>
+      {/* Backdrop for the off-canvas drawer below `lg` — the sidebar is static in the flex layout at `lg` and up. */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={onClose} aria-hidden />
+      )}
 
-      <nav className="flex-1 overflow-y-auto scrollbar-thin px-3 py-4">
-        <div className="flex flex-col gap-0.5">
-          {PRIMARY_NAV.map((item) => (
-            <NavLink key={item.href} item={item} active={isActive(pathname, item.href)} />
-          ))}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex h-full w-[240px] shrink-0 flex-col border-r border-border bg-surface transition-transform duration-200 ease-out lg:static lg:w-[212px] lg:translate-x-0",
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex h-14 items-center justify-between border-b border-border px-4">
+          <Logo />
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1 text-foreground-faint transition-colors hover:bg-surface-sunken hover:text-foreground lg:hidden"
+            aria-label="Close menu"
+          >
+            <X className="size-4" />
+          </button>
         </div>
-      </nav>
 
-      <div className="border-t border-border p-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex w-full items-center gap-2.5 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-surface-sunken">
-              <Avatar className="size-7">
-                <AvatarFallback>{user?.initials ?? "—"}</AvatarFallback>
-              </Avatar>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[12.5px] font-medium text-foreground">{user?.name ?? "Signed out"}</span>
-              </span>
-              <ChevronsUpDown className="size-3.5 shrink-0 text-foreground-faint" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="top" className="w-56">
-            <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem destructive onSelect={handleSignOut}>
-              <LogOut className="size-3.5" /> Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </aside>
+        <nav className="flex-1 overflow-y-auto scrollbar-thin px-3 py-4">
+          <div className="flex flex-col gap-0.5">
+            {PRIMARY_NAV.map((item) => (
+              <NavLink key={item.href} item={item} active={isActive(pathname, item.href)} />
+            ))}
+          </div>
+        </nav>
+
+        <div className="border-t border-border p-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex w-full items-center gap-2.5 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-surface-sunken">
+                <Avatar className="size-7">
+                  <AvatarFallback>{user?.initials ?? "—"}</AvatarFallback>
+                </Avatar>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[12.5px] font-medium text-foreground">{user?.name ?? "Signed out"}</span>
+                </span>
+                <ChevronsUpDown className="size-3.5 shrink-0 text-foreground-faint" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" side="top" className="w-56">
+              <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem destructive onSelect={handleSignOut}>
+                <LogOut className="size-3.5" /> Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </aside>
+    </>
   );
 }

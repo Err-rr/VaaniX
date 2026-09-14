@@ -34,7 +34,7 @@ export function NotificationCenter() {
           <span className="sr-only">Notifications</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
+      <DropdownMenuContent align="end" className="w-80 max-w-[calc(100vw-2rem)]">
         <DropdownMenuLabel className="flex items-center justify-between px-2.5">
           <span>Recent Alerts</span>
           <Link href="/alerts" className="text-[11px] font-medium normal-case text-accent hover:underline">

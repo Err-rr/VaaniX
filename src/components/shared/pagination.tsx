@@ -21,7 +21,7 @@ export function Pagination({
   const end = Math.min(page * pageSize, totalItems);
 
   return (
-    <div className="flex items-center justify-between border-t border-border px-5 py-3">
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-5 py-3">
       <p className="text-[12px] text-foreground-muted">
         Showing <span className="font-medium text-foreground">{formatNumber(start)}–{formatNumber(end)}</span> of{" "}
         <span className="font-medium text-foreground">{formatNumber(totalItems)}</span>

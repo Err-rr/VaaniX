@@ -22,7 +22,7 @@ export function FilterSelect({
 }) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className={className ?? "w-[150px]"}>
+      <SelectTrigger className={className ?? "w-full sm:w-[150px]"}>
         <span className="text-foreground-faint">{label}:</span>
         <SelectValue />
       </SelectTrigger>

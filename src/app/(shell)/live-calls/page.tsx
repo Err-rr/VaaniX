@@ -52,15 +52,15 @@ export default function LiveCallsPage() {
         title="Live Call Monitoring"
         subtitle="Authorized enterprise call streams"
         actions={
-          <div className="flex items-center gap-3 rounded-md border border-border bg-surface px-3.5 py-1.5 text-[12.5px]">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-md border border-border bg-surface px-3.5 py-1.5 text-[12.5px]">
             <span className="flex items-center gap-1.5 font-medium text-foreground">
               <span className="size-1.5 rounded-full bg-critical animate-pulse-dot" /> {counts.active} Active Calls
             </span>
-            <span className="h-3.5 w-px bg-border" />
+            <span className="hidden h-3.5 w-px bg-border sm:block" />
             <span className="flex items-center gap-1.5 font-medium text-foreground">
               <span className="size-1.5 rounded-full bg-warning animate-pulse-dot" /> {counts.analyzing} Under Analysis
             </span>
-            <span className="h-3.5 w-px bg-border" />
+            <span className="hidden h-3.5 w-px bg-border sm:block" />
             <span className="flex items-center gap-1.5 font-medium text-critical-strong">
               <span className="size-1.5 rounded-full bg-critical" /> {counts.critical} Critical
             </span>

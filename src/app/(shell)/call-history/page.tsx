@@ -164,7 +164,7 @@ export default function CallHistoryPage() {
                 setPage(1);
               }}
               options={SEVERITY_OPTIONS}
-              className="w-[150px]"
+              className="w-full sm:w-[150px]"
             />
             <FilterSelect
               label="Decision"
@@ -174,7 +174,7 @@ export default function CallHistoryPage() {
                 setPage(1);
               }}
               options={DECISION_OPTIONS}
-              className="w-[200px]"
+              className="w-full sm:w-[200px]"
             />
           </FilterBar>
           <CallHistoryTable calls={pageItems} columns={columns} />
