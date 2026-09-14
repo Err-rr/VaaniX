@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VoxAegis — Voice Impersonation Defense",
+  title: "VaaniX — Voice Impersonation Defense",
   description:
     "Real-time detection and analyst response platform for AI voice impersonation across enterprise call infrastructure.",
 };
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 const THEME_INIT_SCRIPT = `
 (function () {
   try {
-    var stored = localStorage.getItem("voxaegis-theme");
+    var stored = localStorage.getItem("vaanix-theme");
     var theme = stored === "dark" || stored === "light" ? stored : "light";
     if (theme === "dark") document.documentElement.classList.add("dark");
   } catch (e) {}

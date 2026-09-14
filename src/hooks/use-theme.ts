@@ -4,7 +4,7 @@ import { useCallback, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
-const THEME_CHANGE_EVENT = "voxaegis-theme-change";
+const THEME_CHANGE_EVENT = "vaanix-theme-change";
 
 function subscribe(callback: () => void) {
   window.addEventListener(THEME_CHANGE_EVENT, callback);
@@ -26,7 +26,7 @@ export function useTheme() {
     const next: Theme = document.documentElement.classList.contains("dark") ? "light" : "dark";
     document.documentElement.classList.toggle("dark", next === "dark");
     try {
-      localStorage.setItem("voxaegis-theme", next);
+      localStorage.setItem("vaanix-theme", next);
     } catch {}
     window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
   }, []);

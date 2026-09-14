@@ -90,7 +90,7 @@ export default function CallHistoryPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "voxaegis-call-history.csv";
+    link.download = "vaanix-call-history.csv";
     link.click();
     URL.revokeObjectURL(url);
   }

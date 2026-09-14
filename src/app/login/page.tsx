@@ -45,7 +45,7 @@ export default function LoginPage() {
       <div className="w-full max-w-[380px]">
         <div className="flex flex-col items-center gap-1.5 text-center">
           <Logo className="scale-110" />
-          <p className="mt-3 text-[15px] font-semibold text-foreground">Sign in to VoxAegis</p>
+          <p className="mt-3 text-[15px] font-semibold text-foreground">Sign in to VaaniX</p>
           <p className="text-[13px] text-foreground-muted">Secure access for authorized security personnel</p>
         </div>
 

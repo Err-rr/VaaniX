@@ -1,8 +1,8 @@
-# VoxAegis
+# VaaniX
 
 > **AI-powered real-time voice integrity and impersonation monitoring platform**
 
-VoxAegis is an enterprise security operations dashboard designed to help organizations detect, investigate, and respond to **voice-cloning and voice-impersonation attacks** during calls.
+VaaniX is an enterprise security operations dashboard designed to help organizations detect, investigate, and respond to **voice-cloning and voice-impersonation attacks** during calls.
 
 The project combines a polished **Next.js security console** with a standalone **voice deepfake detection pipeline**. The frontend currently uses deterministic mock/demo data so the complete analyst experience can be demonstrated without requiring a production backend. The Python pipeline is independently capable of capturing audio and running it through the Nes2Net voice deepfake-detection model.
 
@@ -48,7 +48,7 @@ Modern generative-AI systems can clone a person's voice from a relatively small 
 - manipulate employees,
 - or bypass traditional voice-based verification.
 
-VoxAegis is designed as a **security-team-facing platform**, rather than a consumer call-screening application.
+VaaniX is designed as a **security-team-facing platform**, rather than a consumer call-screening application.
 
 The central idea is to continuously analyze call audio and combine multiple signals into an actionable **impersonation risk score**. Security analysts can then monitor active calls, investigate suspicious activity, review alerts, analyze trends, and manage detection policies.
 
@@ -65,13 +65,13 @@ A security system therefore needs to look beyond a single voice characteristic a
 3. **Prosody anomalies** — unusual characteristics in rhythm, pitch, timing, or speech behavior.
 4. **Contextual risk** — whether the call's intent and surrounding context indicate a potentially dangerous request.
 
-VoxAegis combines these signals into one risk score that can drive alert severity and analyst actions.
+VaaniX combines these signals into one risk score that can drive alert severity and analyst actions.
 
 ---
 
 ## Solution
 
-VoxAegis provides a centralized security console containing:
+VaaniX provides a centralized security console containing:
 
 - real-time-style call monitoring,
 - risk scores and severity bands,
@@ -286,7 +286,7 @@ The project includes a protected-login experience with a Google sign-in entry po
                                │
                                ▼
                     ┌─────────────────────┐
-                    │   VoxAegis SOC      │
+                    │   VaaniX SOC      │
                     │      Console        │
                     └──────────┬──────────┘
                                │
@@ -519,7 +519,7 @@ VoxAegis/
 
 ## Risk Scoring
 
-VoxAegis uses a 0–100 risk scale.
+VaaniX uses a 0–100 risk scale.
 
 ### Risk Bands
 
@@ -829,7 +829,7 @@ A production architecture can evolve toward:
              └────────────────┼────────────────┘
                               ▼
                      ┌───────────────────┐
-                     │    VoxAegis       │
+                     │    VaaniX       │
                      │    Next.js UI     │
                      └─────────┬─────────┘
                                │
@@ -906,12 +906,12 @@ Backend ingestion service
       ▼
 Risk event
       │
-      ├── WebSocket → VoxAegis dashboard
+      ├── WebSocket → VaaniX dashboard
       ├── Alert service → security team
       └── Database → investigation/history
 ```
 
-This allows the telecom provider to keep the call stream within its controlled infrastructure while VoxAegis functions as the security intelligence layer.
+This allows the telecom provider to keep the call stream within its controlled infrastructure while VaaniX functions as the security intelligence layer.
 
 ---
 
@@ -1144,7 +1144,7 @@ This repository is currently a project/prototype repository. Add the appropriate
 
 ## Project Summary
 
-**VoxAegis turns voice-cloning detection into an enterprise security workflow.**
+**VaaniX turns voice-cloning detection into an enterprise security workflow.**
 
 Instead of simply answering:
 

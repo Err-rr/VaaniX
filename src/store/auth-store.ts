@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthState>()(
       signOut: () => set({ isAuthenticated: false, user: null }),
     }),
     {
-      name: "voxaegis-auth",
+      name: "vaanix-auth",
       onRehydrateStorage: () => (state) => {
         // Mutate the about-to-be-applied state directly rather than calling
         // useAuthStore.setState here — this callback can run synchronously
