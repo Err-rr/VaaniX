@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LiveDetectionVerdict } from "@/types/voice";
+import { useAnalysisStore } from "@/store/analysis-store";
 
 export type MicState = "idle" | "requesting" | "listening" | "analyzing" | "error";
 
@@ -189,6 +190,17 @@ export function useLiveDetection() {
   }, [micState, cleanupAudio]);
 
   useEffect(() => cleanupAudio, [cleanupAudio]);
+
+  // Mirrors "analyzing" into the shared analysis store for the whole session
+  // it lasts — begin() on entry, end() on exit (natural completion, stop()
+  // interrupting it, or unmount), so ambient UI elsewhere (the dashboard's
+  // Live Signal waveform) reflects real analysis activity, not a fake loop.
+  useEffect(() => {
+    if (micState !== "analyzing") return;
+    const { begin, end } = useAnalysisStore.getState();
+    begin();
+    return end;
+  }, [micState]);
 
   return {
     micState,
