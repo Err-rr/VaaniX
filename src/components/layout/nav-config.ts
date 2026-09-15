@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Bell,
-  FileText,
   Gauge,
   History,
   Mic,
@@ -29,7 +28,6 @@ export const PRIMARY_NAV: NavItem[] = [
   { label: "Investigations", href: "/investigations", icon: Search },
   { label: "Call History", href: "/call-history", icon: History },
   { label: "Analytics", href: "/analytics", icon: BarChart3 },
-  { label: "Reports", href: "/reports", icon: FileText },
 ];
 
 export const ADMIN_NAV: NavItem[] = [
