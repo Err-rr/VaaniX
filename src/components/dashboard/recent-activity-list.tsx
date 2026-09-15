@@ -1,35 +1,31 @@
-import Link from "next/link";
-import type { Call } from "@/types/call";
-import { formatRelativeTime, maskPhoneNumber } from "@/lib/utils";
-import { SeverityDot } from "@/components/shared/severity-badge";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { AlertTriangle } from "lucide-react";
+import type { FraudReport } from "@/types/fraud-report";
+import { EmptyState } from "@/components/shared/empty-state";
 
-/** Compact, editorial activity list — not a full data table. Full filtering lives on Alerts / Call History. */
-export function RecentActivityList({ calls }: { calls: Call[] }) {
+/** Compact, editorial activity list of parsed AI voice-clone fraud reports. */
+export function RecentActivityList({ reports }: { reports: FraudReport[] }) {
+  if (reports.length === 0) {
+    return <EmptyState icon={AlertTriangle} title="No reports yet" description="Fraud reports from emails.json will appear here." />;
+  }
+
   return (
     <ul className="divide-y divide-border">
-      {calls.map((call) => (
-        <li key={call.id}>
-          <Link
-            href={`/live-calls/${call.id}`}
-            className="flex flex-wrap items-center gap-x-4 gap-y-1.5 py-3 transition-colors hover:bg-surface-sunken/50"
-          >
-            <SeverityDot severity={call.severity} className="shrink-0" />
-            <span className="shrink-0 font-mono text-[12.5px] text-foreground-muted sm:w-[92px]">{call.id}</span>
+      {reports.map((report) => (
+        <li key={report.id}>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 py-3">
+            <AlertTriangle className="size-3.5 shrink-0 text-critical" aria-hidden />
+            <span className="shrink-0 font-mono text-[12.5px] text-foreground-muted sm:w-[80px]">{report.id}</span>
             <span className="min-w-0 flex-1 truncate text-[13px] text-foreground">
-              {call.claimedIdentity}
-              <span className="ml-1.5 text-foreground-faint">{maskPhoneNumber(call.callerNumber)}</span>
+              {report.reporterName}
+              <span className="ml-1.5 text-foreground-faint">{report.reporterMobile}</span>
             </span>
-            <span className="tabular shrink-0 text-[13px] font-semibold text-foreground sm:w-8 sm:text-right">
-              {call.overallRisk}
+            <span className="shrink-0 text-[12.5px] text-foreground-muted sm:w-[170px]">
+              Suspected: <span className="font-medium text-foreground">{report.suspectedMobile}</span>
             </span>
-            <span className="shrink-0 sm:w-[150px]">
-              <StatusBadge status={call.decision} />
+            <span className="shrink-0 text-[12px] text-foreground-faint sm:w-24 sm:text-right">
+              {report.dateOfIncident}
             </span>
-            <span className="shrink-0 text-[12px] text-foreground-faint sm:w-16 sm:text-right">
-              {formatRelativeTime(call.startedAt)}
-            </span>
-          </Link>
+          </div>
         </li>
       ))}
     </ul>

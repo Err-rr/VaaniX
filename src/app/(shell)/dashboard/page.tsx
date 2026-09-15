@@ -12,9 +12,8 @@ import { RiskSpectrum } from "@/components/dashboard/risk-spectrum";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KPI_STATS } from "@/data/mock-overview";
-import { ALL_CALLS } from "@/data/mock-calls";
 import { useLiveCounter } from "@/hooks/use-risk-updates";
-import { SEVERITY_ORDER } from "@/lib/risk";
+import { useFraudReports } from "@/hooks/use-fraud-reports";
 
 export default function DashboardPage() {
   const callsAnalyzed = useLiveCounter(KPI_STATS[0].value, { minMs: 5000, maxMs: 12000, step: 1 });
@@ -23,15 +22,7 @@ export default function DashboardPage() {
     [callsAnalyzed]
   );
 
-  const recentActivity = useMemo(
-    () =>
-      [...ALL_CALLS]
-        .sort((a, b) => (a.startedAt < b.startedAt ? 1 : -1))
-        .slice(0, 40)
-        .sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity])
-        .slice(0, 8),
-    []
-  );
+  const { reports } = useFraudReports();
 
   return (
     <div className="flex flex-col gap-8 pb-12">
@@ -95,13 +86,13 @@ export default function DashboardPage() {
         <div className="mb-1 flex items-end justify-between gap-3 border-b border-border pb-3">
           <div>
             <h2 className="text-[14px] font-semibold text-foreground">Recent Activity</h2>
-            <p className="mt-0.5 text-[12.5px] text-foreground-muted">Latest calls ranked by severity</p>
+            <p className="mt-0.5 text-[12.5px] text-foreground-muted">Latest AI voice-clone fraud reports</p>
           </div>
           <Link href="/alerts" className="text-[12.5px] font-medium text-accent hover:underline">
             View all alerts
           </Link>
         </div>
-        <RecentActivityList calls={recentActivity} />
+        <RecentActivityList reports={reports} />
       </section>
     </div>
   );
