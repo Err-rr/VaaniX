@@ -1,7 +1,6 @@
-import { AudioLines } from "lucide-react";
-import { VisualPlaceholder } from "@/components/shared/visual-placeholder";
+import { LiveMicWidget } from "@/components/calls/live-mic-widget";
 
-/** Voice Analysis visual for the Live Call Analysis page. See VisualPlaceholder for swap-in instructions. */
+/** Live Microphone Voice Analysis Visualizer component for Nes2Net real-time detection. */
 export function VoiceAnalysisVisual({ className }: { className?: string }) {
-  return <VisualPlaceholder icon={AudioLines} label="Voice analysis visual" height={220} className={className} />;
+  return <LiveMicWidget className={className} />;
 }
