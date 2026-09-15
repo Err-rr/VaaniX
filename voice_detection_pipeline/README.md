@@ -1,10 +1,13 @@
 # Voice Detection Pipeline
 
-Standalone backend: record audio from a virtual audio device → save it → run
-it through the Nes2Net deepfake-detection model → save + print the verdict.
+Two ways to use this folder's model:
 
-No frontend connection. No API. Nothing outside this folder. Run it, get a
-result.
+- **`pipeline.py`** — record from a virtual audio device → save → detect →
+  print. A local, one-shot CLI tool. No frontend, no API.
+- **`server.py`** — a small Flask API (`/health`, `/detect`) around the same
+  model, kept loaded once. This is what the Next.js app's Live Detection
+  page (browser mic → `/api/live-detection` → this server) actually talks
+  to.
 
 ```
 python pipeline.py
@@ -12,10 +15,13 @@ python pipeline.py
     model_runner.py: run_detection()  →  results/sample_<timestamp>.json + printed verdict
 ```
 
-**Status: confirmed working end to end on macOS.** The Windows steps below
-are written from the same logic but have not been run on an actual Windows
-machine yet — if something breaks, paste the exact error and it gets fixed
-the same way the macOS issues were.
+**Status: confirmed working end to end on macOS**, via `pipeline.py`. The
+Windows steps below are written from the same logic but have not been run
+on an actual Windows machine yet. The Render deployment below has not been
+deployed yet either — the config is written and ready, but nobody has
+clicked "Create Blueprint" and watched it actually come up. If something
+breaks in either case, paste the exact error and it gets fixed the same way
+the macOS issues were.
 
 ---
 
@@ -350,3 +356,68 @@ Each run produces two files in `results/`:
 - **`torch` in this venv is 2.x; the original model repo used 1.8.1.**
   Confirmed not to matter in practice — this pipeline has run the real
   model successfully on the newer version.
+
+---
+
+## Telegram alerts on a detected spoof
+
+`pipeline_with_alerts.py` runs the exact same capture → detect flow as
+`pipeline.py`, then sends a Telegram warning through the `telegram/` folder's
+existing bot if the result is a real (non-stub) SPOOF classification.
+`pipeline.py` itself is untouched — it still runs with zero Telegram
+dependency, for anyone who just wants detection without alerting.
+
+### Setup
+
+**Step 1:** Get a bot token from **@BotFather** on Telegram, if you don't
+already have one, and set it:
+```
+export TELEGRAM_BOT_TOKEN="your real token"
+```
+→ ⚠️ Never put this directly in `telegram/_client.py` — an earlier version
+of this project did exactly that, the token ended up committed to git
+history, and had to be rotated as a result. Environment variable only.
+
+**Step 2:** Message **@Prevent_Scambot** on Telegram and send `/start` —
+Telegram bots can only message users who have messaged them first.
+
+**Step 3:** Find your chat_id.
+```
+cd ../telegram
+python get_chat_id.py
+```
+→ Prints your name and chat_id from the `/start` message you just sent.
+
+**Step 4:** Set it.
+```
+export TELEGRAM_CHAT_ID="the number from step 3"
+```
+
+**Step 5:** Run it.
+```
+cd ../voice_detection_pipeline
+python pipeline_with_alerts.py
+```
+
+### What actually triggers an alert
+
+| Result | Alert sent? |
+|---|---|
+| Real detection, REAL/BONAFIDE | No |
+| Real detection, SPOOF/DEEPFAKE | **Yes** |
+| Stub mode (`VOICE_DETECTION_STUB=1`), any result | No — stub scores are random, alerting on one would just be spam |
+| SPOOF, but `TELEGRAM_CHAT_ID` unset | No — printed warning instead, detection still completes normally |
+| SPOOF, but Telegram API call fails | No — printed warning instead, detection still completes normally |
+
+The last two rows matter for the same reason `db.py` was built to fail
+soft: a Telegram outage, or forgetting to set a chat_id, should never erase
+a detection result you already have and already saved to disk.
+
+### How the import across folders works
+
+`alerts.py` lives in the sibling `telegram/` directory, and it does
+`from _client import api_call` internally — a same-directory import that
+only resolves if `telegram/` itself is on `sys.path`, not just the repo
+root. `pipeline_with_alerts.py` inserts that path before importing `alerts`,
+resolved from `Path(__file__).parent.parent / "telegram"` so it works
+regardless of what directory you actually run the script from.

@@ -4,19 +4,23 @@ Uses only the standard library (urllib) so no extra pip install is needed
 beyond what's already available. Used by alerts.py, bot_listener.py, and
 get_chat_id.py.
 
-Credentials are hardcoded here for local hackathon-demo convenience.
-DO NOT commit real values — keep this file out of git once filled in.
+Credentials come from the environment, never hardcoded here — see README.md
+for how to set TELEGRAM_BOT_TOKEN.
 """
 
 from __future__ import annotations
 
 import json
+import os
 import urllib.error
 import urllib.request
 
 # --- Telegram bot token (from @BotFather) -----------------------------
-# Replace with your real token. Never commit the real value.
-TELEGRAM_BOT_TOKEN = "8899838034:AAFGAB66I6aEVCOPuGuCjguYACLTexhDXas"
+# export TELEGRAM_BOT_TOKEN="your real token" before running anything that
+# imports this module. Never hardcode a real token here — a previous
+# version of this file did exactly that, it ended up committed to git
+# history, and the token had to be rotated via @BotFather as a result.
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 
 API_BASE = "https://api.telegram.org/bot{token}/{method}"
 
