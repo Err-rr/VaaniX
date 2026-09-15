@@ -23,17 +23,39 @@ interface RiskGaugeProps {
   size?: number;
   strokeWidth?: number;
   label?: string;
+  forceColor?: "red" | "green";
 }
 
-export function RiskGauge({ score, size = 208, strokeWidth = 12, label }: RiskGaugeProps) {
+export function RiskGauge({ score, size = 208, strokeWidth = 12, label, forceColor }: RiskGaugeProps) {
   const band = scoreToBand(score);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clamped = Math.min(100, Math.max(0, score));
   const offset = circumference * (1 - clamped / 100);
 
+  const strokeColor =
+    forceColor === "red"
+      ? "#ef4444"
+      : forceColor === "green"
+      ? "#22c55e"
+      : BAND_STROKE[band];
+
+  const scoreTextColor =
+    forceColor === "red"
+      ? "text-red-600 dark:text-red-500 font-bold"
+      : forceColor === "green"
+      ? "text-green-600 dark:text-green-500 font-bold"
+      : "text-foreground";
+
+  const bandTextColor =
+    forceColor === "red"
+      ? "text-red-600 dark:text-red-500 font-bold"
+      : forceColor === "green"
+      ? "text-green-600 dark:text-green-500 font-bold"
+      : BAND_TEXT[band];
+
   return (
-    <div className="flex flex-col items-center gap-3" role="img" aria-label={`Impersonation risk score ${score} out of 100, ${RISK_BAND_LABEL[band]}`}>
+    <div className="flex flex-col items-center gap-3" role="img" aria-label={`Synthetic voice risk score ${score} out of 100`}>
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
           <circle
@@ -49,7 +71,7 @@ export function RiskGauge({ score, size = 208, strokeWidth = 12, label }: RiskGa
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke={BAND_STROKE[band]}
+            stroke={strokeColor}
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -63,18 +85,18 @@ export function RiskGauge({ score, size = 208, strokeWidth = 12, label }: RiskGa
             key={score}
             initial={{ opacity: 0.4 }}
             animate={{ opacity: 1 }}
-            className="tabular text-[44px] font-semibold leading-none text-foreground"
+            className={cn("tabular text-[44px] leading-none", scoreTextColor)}
           >
             {clamped}
           </motion.span>
           <span className="mt-1 text-[12px] text-foreground-faint">/ 100</span>
         </div>
       </div>
-      <div className="flex flex-col items-center gap-0.5">
-        <span className={cn("text-[13px] font-semibold uppercase tracking-wide", BAND_TEXT[band])}>
-          {RISK_BAND_LABEL[band]}
+      <div className="flex flex-col items-center gap-1 text-center">
+        <span className={cn("text-[13px] uppercase tracking-wide", bandTextColor)}>
+          {forceColor === "red" ? "High Synthetic Risk" : forceColor === "green" ? "Low Risk" : RISK_BAND_LABEL[band]}
         </span>
-        {label && <span className="text-[12.5px] text-foreground-muted">{label}</span>}
+        {label && <span className={cn("text-[13px] font-semibold text-center max-w-[220px]", bandTextColor)}>{label}</span>}
       </div>
     </div>
   );

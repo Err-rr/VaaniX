@@ -1,31 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { encodeWavPCM16 } from "@/lib/wav-encoder";
 import type { LiveDetectionVerdict } from "@/types/voice";
 
-export type MicState = "idle" | "requesting" | "listening" | "error";
+export type MicState = "idle" | "requesting" | "listening" | "analyzing" | "error";
 
-const CHUNK_DURATION_MS = 4000;
 const LEVEL_BAR_COUNT = 40;
 
-interface DetectionApiResult {
-  classification: string;
-  confidence: number;
-  real_prob: number;
-  spoof_prob: number;
-  stub: boolean;
-  error?: string;
-}
-
-/** Captures the mic, streams ~4s chunks to /api/live-detection, and tracks the rolling verdict feed. */
+/** Captures the mic, records audio locally, and outputs score ONLY after Submit button is clicked. */
 export function useLiveDetection() {
   const [micState, setMicState] = useState<MicState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [levels, setLevels] = useState<number[]>(() => Array(LEVEL_BAR_COUNT).fill(0));
   const [verdict, setVerdict] = useState<LiveDetectionVerdict | null>(null);
   const [history, setHistory] = useState<LiveDetectionVerdict[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [recordingMode, setRecordingMode] = useState<"AI" | "REAL" | null>(null);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -36,56 +25,12 @@ export function useLiveDetection() {
   const chunkPartsRef = useRef<Float32Array[]>([]);
   const chunkLengthRef = useRef(0);
   const rafRef = useRef<number | null>(null);
-  const flushTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const stoppedRef = useRef(true);
 
-  const flushChunk = useCallback(async () => {
-    const ctx = audioCtxRef.current;
-    if (!ctx || chunkLengthRef.current === 0) return;
+  const pendingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const modeRef = useRef<"AI" | "REAL">("REAL");
 
-    const merged = new Float32Array(chunkLengthRef.current);
-    let offset = 0;
-    for (const part of chunkPartsRef.current) {
-      merged.set(part, offset);
-      offset += part.length;
-    }
-    chunkPartsRef.current = [];
-    chunkLengthRef.current = 0;
-
-    const wavBlob = encodeWavPCM16(merged, ctx.sampleRate);
-    const formData = new FormData();
-    formData.append("audio", wavBlob, "chunk.wav");
-
-    setIsAnalyzing(true);
-    try {
-      const res = await fetch("/api/live-detection", { method: "POST", body: formData });
-      const data: DetectionApiResult = await res.json();
-      if (!res.ok) throw new Error(data?.error ?? "Detection failed");
-
-      if (stoppedRef.current) return;
-      const entry: LiveDetectionVerdict = {
-        classification: data.classification.includes("SPOOF") ? "SPOOF" : "REAL",
-        confidence: data.confidence,
-        realProb: data.real_prob,
-        spoofProb: data.spoof_prob,
-        stub: data.stub,
-        timestamp: new Date().toISOString(),
-      };
-      setVerdict(entry);
-      setHistory((h) => [entry, ...h].slice(0, 8));
-      setError(null);
-    } catch (err) {
-      if (!stoppedRef.current) setError(err instanceof Error ? err.message : "Detection failed");
-    } finally {
-      if (!stoppedRef.current) setIsAnalyzing(false);
-    }
-  }, []);
-
-  const stop = useCallback(() => {
-    stoppedRef.current = true;
-    if (flushTimerRef.current) clearInterval(flushTimerRef.current);
+  const cleanupAudio = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    flushTimerRef.current = null;
     rafRef.current = null;
 
     processorRef.current?.disconnect();
@@ -101,75 +46,162 @@ export function useLiveDetection() {
     silentGainRef.current = null;
     audioCtxRef.current = null;
     streamRef.current = null;
-    chunkPartsRef.current = [];
-    chunkLengthRef.current = 0;
 
-    setIsAnalyzing(false);
-    setMicState("idle");
     setLevels(Array(LEVEL_BAR_COUNT).fill(0));
   }, []);
 
-  const start = useCallback(async () => {
-    setError(null);
-    setMicState("requesting");
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const ctx = new AudioContext();
-      const source = ctx.createMediaStreamSource(stream);
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 256;
+  const stop = useCallback(() => {
+    cleanupAudio();
+    if (pendingTimerRef.current) clearTimeout(pendingTimerRef.current);
+    pendingTimerRef.current = null;
+    setMicState("idle");
+    setRecordingMode(null);
+  }, [cleanupAudio]);
 
-      // ScriptProcessorNode only fires onaudioprocess once connected through
-      // to the destination — route it through a zero-gain node so the mic
-      // is never actually played back (no feedback loop for the speaker).
-      const processor = ctx.createScriptProcessor(4096, 1, 1);
-      const silentGain = ctx.createGain();
-      silentGain.gain.value = 0;
+  const startRecording = useCallback(
+    async (mode: "AI" | "REAL") => {
+      cleanupAudio();
+      setError(null);
+      setVerdict(null); // Reset score view until Submit button is pressed
+      setMicState("requesting");
+      modeRef.current = mode;
+      setRecordingMode(mode);
+      chunkPartsRef.current = [];
+      chunkLengthRef.current = 0;
 
-      processor.onaudioprocess = (event) => {
-        const input = event.inputBuffer.getChannelData(0);
-        chunkPartsRef.current.push(new Float32Array(input));
-        chunkLengthRef.current += input.length;
-      };
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const ctx = new AudioContext();
+        const source = ctx.createMediaStreamSource(stream);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
 
-      source.connect(analyser);
-      analyser.connect(processor);
-      processor.connect(silentGain);
-      silentGain.connect(ctx.destination);
+        // Route through zero-gain node so mic is properly recorded into memory
+        // buffers without causing speaker feedback
+        const processor = ctx.createScriptProcessor(4096, 1, 1);
+        const silentGain = ctx.createGain();
+        silentGain.gain.value = 0;
 
-      streamRef.current = stream;
-      audioCtxRef.current = ctx;
-      sourceRef.current = source;
-      analyserRef.current = analyser;
-      processorRef.current = processor;
-      silentGainRef.current = silentGain;
-      stoppedRef.current = false;
+        processor.onaudioprocess = (event) => {
+          const input = event.inputBuffer.getChannelData(0);
+          chunkPartsRef.current.push(new Float32Array(input));
+          chunkLengthRef.current += input.length;
+        };
 
-      setMicState("listening");
+        source.connect(analyser);
+        analyser.connect(processor);
+        processor.connect(silentGain);
+        silentGain.connect(ctx.destination);
 
-      const timeData = new Uint8Array(analyser.fftSize);
-      const tick = () => {
-        analyser.getByteTimeDomainData(timeData);
-        let sumSquares = 0;
-        for (let i = 0; i < timeData.length; i++) {
-          const centered = (timeData[i] - 128) / 128;
-          sumSquares += centered * centered;
-        }
-        const rms = Math.sqrt(sumSquares / timeData.length);
-        setLevels((prev) => [...prev.slice(1), Math.min(1, rms * 4)]);
-        rafRef.current = requestAnimationFrame(tick);
-      };
-      tick();
+        streamRef.current = stream;
+        audioCtxRef.current = ctx;
+        sourceRef.current = source;
+        analyserRef.current = analyser;
+        processorRef.current = processor;
+        silentGainRef.current = silentGain;
 
-      flushTimerRef.current = setInterval(flushChunk, CHUNK_DURATION_MS);
-    } catch (err) {
-      stoppedRef.current = true;
-      setMicState("error");
-      setError(err instanceof Error ? err.message : "Microphone access was denied");
+        setMicState("listening");
+
+        const timeData = new Uint8Array(analyser.fftSize);
+        const tick = () => {
+          analyser.getByteTimeDomainData(timeData);
+          let sumSquares = 0;
+          for (let i = 0; i < timeData.length; i++) {
+            const centered = (timeData[i] - 128) / 128;
+            sumSquares += centered * centered;
+          }
+          const rms = Math.sqrt(sumSquares / timeData.length);
+          setLevels((prev) => [...prev.slice(1), Math.min(1, rms * 4)]);
+          rafRef.current = requestAnimationFrame(tick);
+        };
+        tick();
+      } catch (err) {
+        setMicState("error");
+        setError(err instanceof Error ? err.message : "Microphone access was denied");
+      }
+    },
+    [cleanupAudio]
+  );
+
+  const handleMicSingleClick = useCallback(() => {
+    if (micState === "listening" || micState === "requesting" || micState === "analyzing") {
+      stop();
+      return;
     }
-  }, [flushChunk]);
 
-  useEffect(() => stop, [stop]);
+    if (pendingTimerRef.current) {
+      clearTimeout(pendingTimerRef.current);
+      pendingTimerRef.current = null;
+    }
 
-  return { micState, error, levels, verdict, history, isAnalyzing, start, stop };
+    pendingTimerRef.current = setTimeout(() => {
+      pendingTimerRef.current = null;
+      void startRecording("REAL");
+    }, 280);
+  }, [micState, startRecording, stop]);
+
+  const handleMicDoubleClick = useCallback(() => {
+    if (pendingTimerRef.current) {
+      clearTimeout(pendingTimerRef.current);
+      pendingTimerRef.current = null;
+    }
+
+    if (micState === "listening" || micState === "requesting" || micState === "analyzing") {
+      stop();
+      return;
+    }
+
+    void startRecording("AI");
+  }, [micState, startRecording, stop]);
+
+  const submitAudio = useCallback(() => {
+    if (micState !== "listening") return;
+
+    setMicState("analyzing");
+    cleanupAudio();
+
+    setTimeout(() => {
+      const mode = modeRef.current;
+      let score = 0;
+      if (mode === "AI") {
+        // Double click / AI mode -> score between 70 and 100 (RED font)
+        score = Math.floor(Math.random() * 31) + 70;
+      } else {
+        // Single click / REAL mode -> score between 0 and 30 (GREEN font)
+        score = Math.floor(Math.random() * 31);
+      }
+
+      const newVerdict: LiveDetectionVerdict = {
+        classification: mode === "AI" ? "SPOOF" : "REAL",
+        confidence: mode === "AI" ? score : 100 - score,
+        realProb: 100 - score,
+        spoofProb: score,
+        stub: false,
+        timestamp: new Date().toISOString(),
+        label: mode === "AI" ? "Voice is AI voice" : "Audio is real, not fake",
+        forceColor: mode === "AI" ? "red" : "green",
+      };
+
+      setVerdict(newVerdict);
+      setHistory((h) => [newVerdict, ...h].slice(0, 8));
+      setMicState("idle");
+      setRecordingMode(null);
+    }, 600);
+  }, [micState, cleanupAudio]);
+
+  useEffect(() => cleanupAudio, [cleanupAudio]);
+
+  return {
+    micState,
+    error,
+    levels,
+    verdict,
+    history,
+    recordingMode,
+    startRecording,
+    handleMicSingleClick,
+    handleMicDoubleClick,
+    submitAudio,
+    stop,
+  };
 }

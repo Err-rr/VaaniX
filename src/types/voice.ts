@@ -8,6 +8,8 @@ export interface LiveDetectionVerdict {
   spoofProb: number;
   stub: boolean;
   timestamp: string;
+  label?: string;
+  forceColor?: "red" | "green";
 }
 
 export interface VoiceProfile {
