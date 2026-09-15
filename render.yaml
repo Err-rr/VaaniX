@@ -1,0 +1,25 @@
+# render.yaml — Render deployment configuration for VoxAegis Live Detection Backend
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: voxaegis-live-detection
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    # Use a persistent disk so model weights survive deploys
+    disk:
+      name: model-weights
+      mountPath: /app
+      sizeGB: 20
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      # Optional: set a direct URL to the Nes2Net .pth if Google Drive blocks the container
+      # - key: NES2NET_WEIGHTS_URL
+      #   value: https://your-direct-download-link.com/wav2vec2_Nes2Net_X_best.pth
+    healthCheckPath: /api/health
+    # Render free tier has 512 MB RAM — upgrade to Standard (2 GB+) for model inference
+    # plan: starter   # 512 MB RAM (model will likely OOM — use standard or above)
+    # plan: standard  # 2 GB RAM — minimum recommended
