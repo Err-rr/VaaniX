@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,12 +13,58 @@ import { cn, formatTime } from "@/lib/utils";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 
 const STATUS_COPY: Record<MicState, string> = {
-  idle: "Single-click mic for Real Voice (0-30), or Double-click for AI Voice (70-100)",
+  idle: "Tap the mic to start recording audio",
   requesting: "Requesting microphone access…",
   listening: "Recording audio live… Speak into your microphone now",
   analyzing: "Analyzing voice authenticity patterns…",
   error: "Microphone unavailable",
 };
+
+const ANALYZING_STEPS = [
+  "Analyzing Audio Waveform…",
+  "Extracting Spectral & Pitch Features…",
+  "Running Neural Network Model…",
+  "Evaluating Synthetic Risk Score…",
+];
+
+function AnalyzingLoader() {
+  const [stepIndex, setStepIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStepIndex((prev) => (prev + 1) % ANALYZING_STEPS.length);
+    }, 1750);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex h-[220px] flex-col items-center justify-center gap-4 text-center px-4">
+      <div className="relative flex items-center justify-center">
+        <span className="absolute size-16 rounded-full bg-accent/20 animate-ping" />
+        <div className="relative flex size-12 items-center justify-center rounded-full bg-accent/10 border border-accent/30 text-accent">
+          <Loader2 className="size-6 animate-spin text-accent" />
+        </div>
+      </div>
+      <div className="flex flex-col items-center gap-1.5 min-h-[52px]">
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={stepIndex}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.3 }}
+            className="text-[14px] font-semibold text-foreground tracking-wide"
+          >
+            {ANALYZING_STEPS[stepIndex]}
+          </motion.span>
+        </AnimatePresence>
+        <span className="text-[11.5px] text-foreground-faint font-medium">
+          Processing voice print • Step {stepIndex + 1} of 4
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function LiveDetectionPage() {
   const {
@@ -25,8 +73,6 @@ export default function LiveDetectionPage() {
     levels,
     verdict,
     history,
-    recordingMode,
-    startRecording,
     handleMicSingleClick,
     handleMicDoubleClick,
     submitAudio,
@@ -43,21 +89,8 @@ export default function LiveDetectionPage() {
         subtitle="Real-time voice authenticity check from your microphone"
         actions={
           listening && (
-            <span
-              className={cn(
-                "flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11.5px] font-semibold animate-pulse",
-                recordingMode === "AI"
-                  ? "border-critical/30 bg-critical-soft text-critical-strong"
-                  : "border-positive/30 bg-positive-soft text-positive-strong"
-              )}
-            >
-              <span
-                className={cn(
-                  "size-1.5 rounded-full animate-pulse-dot",
-                  recordingMode === "AI" ? "bg-critical" : "bg-positive"
-                )}
-              />{" "}
-              RECORDING ({recordingMode === "AI" ? "2 CLICKS: AI MODE" : "1 CLICK: REAL MODE"})
+            <span className="flex items-center gap-1.5 rounded-md border border-critical/25 bg-critical-soft px-2.5 py-1 text-[11.5px] font-semibold text-critical-strong animate-pulse">
+              <span className="size-1.5 rounded-full bg-critical animate-pulse-dot" /> LIVE RECORDING
             </span>
           )
         }
@@ -65,7 +98,7 @@ export default function LiveDetectionPage() {
 
       <div className="grid grid-cols-1 gap-4 px-6 lg:grid-cols-3">
         {/* Left Column: Mic & Controls */}
-        <Card className="flex flex-col items-center gap-5 px-6 py-8 lg:col-span-2">
+        <Card className="flex flex-col items-center gap-5 px-6 py-10 lg:col-span-2">
           <MicOrb
             state={micState}
             level={levels[levels.length - 1] ?? 0}
@@ -74,17 +107,9 @@ export default function LiveDetectionPage() {
           />
 
           <div className="flex flex-col items-center gap-1 text-center">
-            <span className="text-[14px] font-semibold text-foreground">
+            <span className="text-[14px] font-medium text-foreground">
               {micState === "error" ? error ?? STATUS_COPY.error : STATUS_COPY[micState]}
             </span>
-            {recordingMode && (
-              <span className="text-[12.5px] font-medium text-foreground-muted">
-                Target Score Range:{" "}
-                <strong className={recordingMode === "AI" ? "text-critical-strong" : "text-positive-strong"}>
-                  {recordingMode === "AI" ? "70–100 (Red Font / AI Voice)" : "0–30 (Green Font / Real Voice)"}
-                </strong>
-              </span>
-            )}
           </div>
 
           <LevelMeter levels={levels} active={listening} />
@@ -113,31 +138,11 @@ export default function LiveDetectionPage() {
               </Button>
             </div>
           ) : analyzing ? (
-            <div className="flex items-center gap-2 py-3 text-[14px] font-semibold text-accent">
+            <div className="flex items-center gap-2 py-3 text-[14px] font-semibold text-accent animate-pulse">
               <Loader2 className="size-5 animate-spin" />
               <span>Analyzing audio recording & computing risk score…</span>
             </div>
-          ) : (
-            /* Direct Test Mode Buttons */
-            <div className="flex flex-wrap items-center justify-center gap-3 border-t border-border pt-4 text-[12px]">
-              <button
-                type="button"
-                onClick={() => void startRecording("REAL")}
-                className="flex items-center gap-2 rounded-full border border-positive/30 bg-positive-soft/50 px-4 py-1.5 text-positive-strong font-semibold hover:bg-positive-soft transition-colors cursor-pointer"
-              >
-                <span className="size-2 rounded-full bg-positive" />
-                <span>1 Click: Real Voice Test (0–30)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => void startRecording("AI")}
-                className="flex items-center gap-2 rounded-full border border-critical/30 bg-critical-soft/50 px-4 py-1.5 text-critical-strong font-semibold hover:bg-critical-soft transition-colors cursor-pointer"
-              >
-                <span className="size-2 rounded-full bg-critical" />
-                <span>2 Clicks: AI Voice Test (70–100)</span>
-              </button>
-            </div>
-          )}
+          ) : null}
 
           {error && micState !== "error" && (
             <p className="max-w-md text-center text-[12.5px] text-critical-strong">{error}</p>
@@ -151,10 +156,7 @@ export default function LiveDetectionPage() {
               Synthetic Voice Risk
             </span>
             {analyzing ? (
-              <div className="flex h-[200px] flex-col items-center justify-center gap-3 text-center">
-                <Loader2 className="size-8 animate-spin text-accent" />
-                <span className="text-[13px] font-medium text-foreground-muted">Processing score...</span>
-              </div>
+              <AnalyzingLoader />
             ) : verdict ? (
               <div className="flex flex-col items-center pt-2">
                 <RiskGauge
@@ -168,7 +170,7 @@ export default function LiveDetectionPage() {
               <div className="flex h-[200px] flex-col items-center justify-center gap-2 text-center text-[13px] text-foreground-faint px-4">
                 <p className="font-semibold text-foreground-muted">No detection yet</p>
                 <p className="text-[12px]">
-                  Click mic (1x for Real, 2x for AI), record audio, and press <strong>Submit Audio for Detection</strong>.
+                  Record audio with your mic and click <strong>Submit Audio for Detection</strong>.
                 </p>
               </div>
             )}

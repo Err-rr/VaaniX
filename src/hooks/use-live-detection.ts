@@ -7,7 +7,7 @@ export type MicState = "idle" | "requesting" | "listening" | "analyzing" | "erro
 
 const LEVEL_BAR_COUNT = 40;
 
-/** Captures the mic, records audio locally, and outputs score ONLY after Submit button is clicked. */
+/** Captures the mic, records audio locally, and outputs score ONLY after Submit button is clicked with 7s delay. */
 export function useLiveDetection() {
   const [micState, setMicState] = useState<MicState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -76,8 +76,6 @@ export function useLiveDetection() {
         const analyser = ctx.createAnalyser();
         analyser.fftSize = 256;
 
-        // Route through zero-gain node so mic is properly recorded into memory
-        // buffers without causing speaker feedback
         const processor = ctx.createScriptProcessor(4096, 1, 1);
         const silentGain = ctx.createGain();
         silentGain.gain.value = 0;
@@ -160,6 +158,7 @@ export function useLiveDetection() {
     setMicState("analyzing");
     cleanupAudio();
 
+    // 7 seconds analysis delay as requested
     setTimeout(() => {
       const mode = modeRef.current;
       let score = 0;
@@ -186,7 +185,7 @@ export function useLiveDetection() {
       setHistory((h) => [newVerdict, ...h].slice(0, 8));
       setMicState("idle");
       setRecordingMode(null);
-    }, 600);
+    }, 7000);
   }, [micState, cleanupAudio]);
 
   useEffect(() => cleanupAudio, [cleanupAudio]);
