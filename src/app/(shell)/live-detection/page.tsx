@@ -9,8 +9,8 @@ import { RiskGauge } from "@/components/calls/risk-gauge";
 import { MicOrb } from "@/components/live-detection/mic-orb";
 import { LevelMeter } from "@/components/live-detection/level-meter";
 import { useLiveDetection, type MicState } from "@/hooks/use-live-detection";
-import { cn, formatTime } from "@/lib/utils";
-import { CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { cn, formatRecordingTime, formatTime } from "@/lib/utils";
+import { CheckCircle2, Loader2, Timer, XCircle } from "lucide-react";
 
 const STATUS_COPY: Record<MicState, string> = {
   idle: "Tap the mic to start recording audio",
@@ -73,6 +73,7 @@ export default function LiveDetectionPage() {
     levels,
     verdict,
     history,
+    recordingTime,
     handleMicSingleClick,
     handleMicDoubleClick,
     submitAudio,
@@ -90,7 +91,7 @@ export default function LiveDetectionPage() {
         actions={
           listening && (
             <span className="flex items-center gap-1.5 rounded-md border border-critical/25 bg-critical-soft px-2.5 py-1 text-[11.5px] font-semibold text-critical-strong animate-pulse">
-              <span className="size-1.5 rounded-full bg-critical animate-pulse-dot" /> LIVE RECORDING
+              <span className="size-1.5 rounded-full bg-critical animate-pulse-dot" /> LIVE RECORDING • {formatRecordingTime(recordingTime)}
             </span>
           )
         }
@@ -106,10 +107,18 @@ export default function LiveDetectionPage() {
             onDoubleClick={handleMicDoubleClick}
           />
 
-          <div className="flex flex-col items-center gap-1 text-center">
+          <div className="flex flex-col items-center gap-2 text-center">
             <span className="text-[14px] font-medium text-foreground">
               {micState === "error" ? error ?? STATUS_COPY.error : STATUS_COPY[micState]}
             </span>
+
+            {listening && (
+              <div className="flex items-center gap-2 rounded-full border border-critical/30 bg-critical-soft/60 px-3.5 py-1 text-critical-strong shadow-xs transition-all">
+                <Timer className="size-3.5 text-critical animate-pulse" />
+                <span className="font-mono text-[14px] font-bold tracking-wider">{formatRecordingTime(recordingTime)}</span>
+                <span className="text-[11.5px] font-medium text-foreground-muted">recorded</span>
+              </div>
+            )}
           </div>
 
           <LevelMeter levels={levels} active={listening} />
