@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Model checkpoints — large, downloaded separately, never committed
+*.pt
+*.pth
+
+# Recorded samples and their verdicts — generated at runtime
+results/*.wav
+results/*.json
