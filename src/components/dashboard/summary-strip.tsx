@@ -1,11 +1,19 @@
 import { ArrowDown, ArrowUp } from "lucide-react";
 import type { KpiStat } from "@/data/mock-overview";
-import { cn, formatNumber } from "@/lib/utils";
+import { cn, formatCompactNumber, formatNumber } from "@/lib/utils";
 
 function formatValue(stat: KpiStat): string {
   if (stat.format === "number") return formatNumber(stat.value);
   if (stat.format === "score") return stat.value.toFixed(1);
   return `${stat.value}%`;
+}
+
+// Below `sm` the strip is a 2-up grid, tight enough that a large comma-grouped
+// number (e.g. "12,850") can overflow next to the trend badge. Compact it
+// there ("12.85K") and only show the full precise value once there's room.
+function formatCompactValue(stat: KpiStat): string {
+  if (stat.format === "number") return formatCompactNumber(stat.value, 2);
+  return formatValue(stat);
 }
 
 /** Single editorial strip presenting the headline metrics as inline stat groups, not separate cards. */
@@ -25,7 +33,8 @@ export function SummaryStrip({ stats }: { stats: KpiStat[] }) {
             <span className="text-[12px] font-medium uppercase tracking-wide text-foreground-muted">{stat.label}</span>
             <div className="flex items-baseline gap-2.5">
               <span className="tabular text-[26px] font-semibold leading-none text-foreground">
-                {formatValue(stat)}
+                <span className="sm:hidden">{formatCompactValue(stat)}</span>
+                <span className="hidden sm:inline">{formatValue(stat)}</span>
               </span>
               <span className={cn("flex items-center gap-0.5 text-[12px] font-medium", trendColor)}>
                 <TrendIcon className="size-3" />

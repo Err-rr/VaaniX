@@ -9,10 +9,8 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-IN").format(value);
 }
 
-export function formatCompactNumber(value: number): string {
-  return new Intl.NumberFormat("en-IN", { notation: "compact", maximumFractionDigits: 1 }).format(
-    value
-  );
+export function formatCompactNumber(value: number, maximumFractionDigits = 1): string {
+  return new Intl.NumberFormat("en-IN", { notation: "compact", maximumFractionDigits }).format(value);
 }
 
 export function formatCurrencyINR(value: number): string {

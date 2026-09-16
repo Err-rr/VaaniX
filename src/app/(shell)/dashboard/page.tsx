@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 import { KPI_STATS } from "@/data/mock-overview";
 import { useLiveCounter } from "@/hooks/use-risk-updates";
 import { useFraudReports } from "@/hooks/use-fraud-reports";
-import { useIsAnalyzing } from "@/store/analysis-store";
 
 export default function DashboardPage() {
   const callsAnalyzed = useLiveCounter(KPI_STATS[0].value, { minMs: 5000, maxMs: 12000, step: 1 });
@@ -22,7 +21,6 @@ export default function DashboardPage() {
   );
 
   const { reports, refetch } = useFraudReports();
-  const isAnalyzing = useIsAnalyzing();
 
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState<string | null>(null);
@@ -60,7 +58,7 @@ export default function DashboardPage() {
         </div>
         <Card className="flex flex-col gap-2 px-6 py-6">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-foreground-faint">Live Signal</span>
-          <RiskWaveform className="mt-2" active={isAnalyzing} />
+          <RiskWaveform className="mt-2" />
         </Card>
       </section>
 
