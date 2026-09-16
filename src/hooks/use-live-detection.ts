@@ -16,6 +16,7 @@ export function useLiveDetection() {
   const [verdict, setVerdict] = useState<LiveDetectionVerdict | null>(null);
   const [history, setHistory] = useState<LiveDetectionVerdict[]>([]);
   const [recordingMode, setRecordingMode] = useState<"AI" | "REAL" | null>(null);
+  const [recordingTime, setRecordingTime] = useState<number>(0);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -29,8 +30,17 @@ export function useLiveDetection() {
 
   const pendingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const modeRef = useRef<"AI" | "REAL">("REAL");
+  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopTimer = useCallback(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+  }, []);
 
   const cleanupAudio = useCallback(() => {
+    stopTimer();
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
 
@@ -49,7 +59,7 @@ export function useLiveDetection() {
     streamRef.current = null;
 
     setLevels(Array(LEVEL_BAR_COUNT).fill(0));
-  }, []);
+  }, [stopTimer]);
 
   const stop = useCallback(() => {
     cleanupAudio();
@@ -57,6 +67,7 @@ export function useLiveDetection() {
     pendingTimerRef.current = null;
     setMicState("idle");
     setRecordingMode(null);
+    setRecordingTime(0);
   }, [cleanupAudio]);
 
   const startRecording = useCallback(
@@ -100,6 +111,12 @@ export function useLiveDetection() {
         silentGainRef.current = silentGain;
 
         setMicState("listening");
+        setRecordingTime(0);
+        stopTimer();
+        const startTime = Date.now();
+        timerIntervalRef.current = setInterval(() => {
+          setRecordingTime(Math.floor((Date.now() - startTime) / 1000));
+        }, 200);
 
         const timeData = new Uint8Array(analyser.fftSize);
         const tick = () => {
@@ -208,6 +225,7 @@ export function useLiveDetection() {
     levels,
     verdict,
     history,
+    recordingTime,
     recordingMode,
     startRecording,
     handleMicSingleClick,
