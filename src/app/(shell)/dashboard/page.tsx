@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { RefreshCw } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { SummaryStrip } from "@/components/dashboard/summary-strip";
 import { RecentActivityList } from "@/components/dashboard/recent-activity-list";
 import { RiskWaveform } from "@/components/dashboard/risk-waveform";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { KPI_STATS } from "@/data/mock-overview";
 import { useLiveCounter } from "@/hooks/use-risk-updates";
 import { useFraudReports } from "@/hooks/use-fraud-reports";
@@ -19,8 +21,26 @@ export default function DashboardPage() {
     [callsAnalyzed]
   );
 
-  const { reports } = useFraudReports();
+  const { reports, refetch } = useFraudReports();
   const isAnalyzing = useIsAnalyzing();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    setRefreshError(null);
+    try {
+      const res = await fetch("/api/emails/refresh", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error ?? "Refresh failed");
+      await refetch();
+    } catch (err) {
+      setRefreshError(err instanceof Error ? err.message : "Refresh failed");
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-8 pb-12">
@@ -50,10 +70,24 @@ export default function DashboardPage() {
             <h2 className="text-[14px] font-semibold text-foreground">Recent Activity</h2>
             <p className="mt-0.5 text-[12.5px] text-foreground-muted">Latest AI voice-clone fraud reports</p>
           </div>
-          <Link href="/alerts" className="text-[12.5px] font-medium text-accent hover:underline">
-            View all alerts
-          </Link>
+          <div className="flex flex-col items-end gap-1.5">
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-1.5 text-[12.5px] font-medium text-accent hover:underline disabled:cursor-not-allowed disabled:opacity-60 disabled:no-underline"
+            >
+              <RefreshCw className={cn("size-3.5", refreshing && "animate-spin")} />
+              {refreshing ? "Refreshing…" : "Refresh"}
+            </button>
+            <Link href="/alerts" className="text-[12.5px] font-medium text-accent hover:underline">
+              View all alerts
+            </Link>
+          </div>
         </div>
+        {refreshError && (
+          <p className="mb-2 text-[12px] text-critical-strong">{refreshError}</p>
+        )}
         <RecentActivityList reports={reports} />
       </section>
     </div>

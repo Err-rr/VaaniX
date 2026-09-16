@@ -7,11 +7,8 @@ This is intentionally a separate file from pipeline.py, not a modification
 of it — pipeline.py stays usable on its own, with zero Telegram dependency,
 for anyone who just wants detection without alerting.
 
-Setup (see telegram/README.md for the Telegram side in full):
-    1. Message @Prevent_Scambot on Telegram, send /start
-    2. cd ../telegram && python get_chat_id.py   -> gives you a chat_id
-    3. export TELEGRAM_BOT_TOKEN="..."            (from @BotFather)
-    4. export TELEGRAM_CHAT_ID="..."               (from step 2)
+Setup: none. The bot token (telegram/_client.py) and TELEGRAM_CHAT_ID below
+are both hardcoded for this one test recipient (Devansh) — just run it.
 
 Usage:
     python pipeline_with_alerts.py
@@ -22,7 +19,6 @@ Usage:
 """
 
 import json
-import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -39,16 +35,17 @@ sys.path.insert(0, str(TELEGRAM_DIR))
 
 from alerts import send_voice_clone_alert  # noqa: E402  (see sys.path note above)
 
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
+# Hardcoded to Devansh's chat_id — this pipeline is only ever tested against
+# one recipient, discovered via telegram/get_chat_id.py.
+TELEGRAM_CHAT_ID = "1814620976"
 
 # Alert fires when spoof_prob exceeds this — a separate knob from
 # model_runner.py's own 50% SPOOF/REAL classification cutoff, so alerting
-# sensitivity can be tuned here without touching that file.
-# 0.0 for now: alerts on essentially every non-stub run, since spoof_prob is
-# almost never exactly 0%. This is deliberately maximally sensitive for
-# testing the Telegram path itself — raise it (e.g. to 70 or 80) once you
-# want alerts only on confident spoof calls, not near-every detection.
-ALERT_THRESHOLD_PERCENT = 0.0
+# sensitivity can be tuned here without touching that file. Back to 50%
+# (matches the classification cutoff, so an alert fires exactly when the
+# verdict is SPOOF) — was temporarily 0.0 for testing the Telegram path
+# itself on every run.
+ALERT_THRESHOLD_PERCENT = 50.0
 
 
 def main() -> None:

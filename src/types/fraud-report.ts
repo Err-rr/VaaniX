@@ -3,8 +3,13 @@ export interface FraudReport {
   id: string;
   reporterName: string;
   reporterMobile: string;
+  reporterEmail: string;
   suspectedMobile: string;
   dateOfIncident: string;
+  approxTime: string;
+  bankAccount: string;
+  amountLost: string;
+  transactionId: string;
   subject: string;
   from: string;
 }

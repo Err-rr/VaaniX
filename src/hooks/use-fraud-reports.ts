@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { parseFraudReports } from "@/lib/parse-fraud-reports";
 import type { FraudReport, RawEmail } from "@/types/fraud-report";
 
@@ -26,20 +26,20 @@ function isLikelyHardRefresh(): boolean {
  * read from that cache instead of re-fetching, so the list stays stable
  * while browsing — only a hard refresh re-reads emails.json and updates it.
  */
-export function useFraudReports(): { reports: FraudReport[]; loading: boolean } {
+export function useFraudReports(): { reports: FraudReport[]; loading: boolean; refetch: () => Promise<void> } {
   const [reports, setReports] = useState<FraudReport[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const refresh = useCallback(async () => {
+    const res = await fetch("/emails.json", { cache: "no-store" });
+    const raw: RawEmail[] = await res.json();
+    const parsed = parseFraudReports(raw);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    setReports(parsed);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
-
-    async function refresh() {
-      const res = await fetch("/emails.json", { cache: "no-store" });
-      const raw: RawEmail[] = await res.json();
-      const parsed = parseFraudReports(raw);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-      if (!cancelled) setReports(parsed);
-    }
 
     async function load() {
       try {
@@ -61,7 +61,7 @@ export function useFraudReports(): { reports: FraudReport[]; loading: boolean } 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refresh]);
 
-  return { reports, loading };
+  return { reports, loading, refetch: refresh };
 }

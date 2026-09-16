@@ -1,0 +1,65 @@
+VoxAegis / VaaniX — Demo Run Steps
+===================================
+
+PART 1 — Voice detection + Telegram alert
+------------------------------------------
+1. Set your Mac's system output to BlackHole (System Settings > Sound > Output).
+   This routes whatever audio is playing (the call) into the capture script
+   instead of your speakers.
+
+2. Open a terminal and activate the shared venv:
+     source /Users/devanshkedia/VoxAegis/.venv/bin/activate
+
+3. Go to the voice detection pipeline folder:
+     cd /Users/devanshkedia/VoxAegis/voice_detection_pipeline
+
+4. Run the pipeline:
+     python pipeline_with_alerts.py
+
+   - It counts down 5 seconds, then records for 10 seconds.
+   - Make sure the scam/test audio is actually playing during that 10s window.
+   - It prints the verdict (REAL/SPOOF + confidence) in the terminal.
+   - If the verdict is SPOOF with spoof_prob > 50%, it automatically sends a
+     Telegram alert — no extra steps needed (bot token + chat_id are already
+     hardcoded in telegram/_client.py and pipeline_with_alerts.py).
+
+
+PART 2 — Website + email fraud-report dashboard
+--------------------------------------------------
+5. In a separate terminal, start the frontend (from the project root):
+     cd /Users/devanshkedia/VoxAegis
+     npm run dev
+
+6. Open the dashboard in your browser (usually http://localhost:3000).
+
+7. Click the "Refresh" button (top right of the Recent Activity section).
+   This runs email_agent/save_emails.py in the background, which fetches
+   your 10 most recent Gmail inbox emails and writes them to
+   public/emails.json. The table then reloads with the parsed fraud reports.
+
+   - First time / after a scope or account change, this will pop a Google
+     login tab — approve access with the correct test-user Gmail account.
+
+
+TROUBLESHOOTING
+----------------
+- "google.auth.exceptions.RefreshError: invalid_scope" when clicking Refresh:
+     This means the saved login (token.json) was issued under a different
+     permission scope than the app currently asks for. Fix:
+       rm /Users/devanshkedia/VoxAegis/email_agent/token.json
+     Then click Refresh (or run save_emails.py) again — it will re-open the
+     Google login flow and issue a fresh token under the current scope.
+
+- "ModuleNotFoundError: No module named 'fairseq'":
+     fairseq isn't in requirements.txt (installed separately on purpose).
+     Fix:
+       pip install --no-deps git+https://github.com/facebookresearch/fairseq.git
+
+- "Access blocked: ... has not completed the Google verification process":
+     Your Google Cloud OAuth consent screen is in Testing mode. Add the
+     Gmail account you're logging in with under APIs & Services > OAuth
+     consent screen > Test users, then try again.
+
+- "command not found: python":
+     The venv isn't activated in this terminal. Run:
+       source /Users/devanshkedia/VoxAegis/.venv/bin/activate

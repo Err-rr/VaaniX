@@ -1,18 +1,19 @@
-# Standalone deps for voice_detection_pipeline/ — install into this folder's
-# own venv. Not merged into the project's top-level requirements.
+# Combined deps for the whole VoxAegis project — one shared venv at the repo
+# root (.venv/), Python 3.10 specifically.
 #
 # fairseq is deliberately NOT listed here — it needs its own no-deps install
-# command under Python 3.10 specifically. See README.md, section "Setup."
+# command under Python 3.10. See voice_detection_pipeline/README.md, section
+# "Setup," for that exact command.
 
-# --- capture.py (BlackHole audio capture) ---
+# --- voice_detection_pipeline/capture.py (BlackHole audio capture) ---
 sounddevice>=0.4.6
 soundfile>=0.12.1
 numpy>=1.26.0
 
-# --- server.py (HTTP server for the frontend's Live Detection page) ---
+# --- voice_detection_pipeline/server.py (HTTP server for the frontend's Live Detection page) ---
 flask>=3.0.0
 
-# --- model_runner.py (Nes2Net inference) ---
+# --- voice_detection_pipeline/model_runner.py (Nes2Net inference) ---
 torch>=2.0.0
 torchaudio>=2.0.0
 librosa>=0.10.0
@@ -38,3 +39,8 @@ tqdm
 # imports fairseq.scoring (BLEU translation metrics — unrelated to audio
 # detection, but still imported unconditionally), which needs this:
 sacrebleu
+
+# --- email_agent/email_connector.py (Gmail OAuth + fetch) ---
+google-auth
+google-auth-oauthlib
+google-api-python-client

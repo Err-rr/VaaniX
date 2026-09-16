@@ -20,7 +20,7 @@ import urllib.request
 # imports this module. Never hardcode a real token here — a previous
 # version of this file did exactly that, it ended up committed to git
 # history, and the token had to be rotated via @BotFather as a result.
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_BOT_TOKEN = "8899838034:AAFGAB66I6aEVCOPuGuCjguYACLTexhDXas"
 
 API_BASE = "https://api.telegram.org/bot{token}/{method}"
 

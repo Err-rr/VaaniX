@@ -28,6 +28,10 @@ __pycache__/
 *.pem
 .env*
 .vercel
+
+# Gmail OAuth client secret + refresh/access token — never commit these
+email_agent/credentials.json
+email_agent/token.json
 *.tsbuildinfo
 next-env.d.ts
 Thumbs.db
